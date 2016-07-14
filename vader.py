@@ -1,9 +1,17 @@
+import sys
 import time
 
 from vaderSentiment.vaderSentiment import sentiment as vs
 
 
 def main():
+    try:
+        max_reviews = int(sys.argv[-1]) if len(sys.argv) > 1 else None
+    except Exception, e:
+        print "Whoops:", str(e)
+        print "Usage: python vader.py [max_reviews]"
+        return
+    print "Processing %s reviews" % (str(max_reviews) if max_reviews else "all")
 
     d = {}
 
@@ -14,7 +22,7 @@ def main():
             for line in infile:
                 index += 1
                 if index == 0:
-                    # outfile.write(line)
+                    outfile.write(line)
                     continue
                 if index % 100 == 0:
                     print index / 100,
@@ -28,23 +36,24 @@ def main():
                 outfile.write(new_line)            
                 d[text] = score
 
-                # if index > 2000:
-                #     break
+                if max_reviews and index >= max_reviews:
+                    break
 
     print
-    duration = time.time() - start
-    print "%d reviews took %f seconds for an average of %f seconds per review" % (index, duration, duration/index)
+    if max_reviews:
+        duration = time.time() - start
+        print "%d reviews took %f seconds for an average of %f seconds per review" % (index, duration, duration/index)
 
-    sorted_reviews = sorted(d.items(), key=lambda x: x[1])
-    worst = sorted_reviews[:10]
-    best = sorted_reviews[-10:]
-    print "WORST"
-    for w in worst:
-        print w[0], w[1]
+        sorted_reviews = sorted(d.items(), key=lambda x: x[1])
+        worst = sorted_reviews[:10]
+        best = sorted_reviews[-10:]
+        print "WORST"
+        for w in worst:
+            print w[0], w[1]
 
-    print "BEST"
-    for b in best:
-        print b[0], b[1]
+        print "BEST"
+        for b in best:
+            print b[0], b[1]
 
 
 if __name__ == "__main__":
